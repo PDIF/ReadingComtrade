@@ -1,0 +1,44 @@
+# depslib dependency file v1.0
+1691416118 source:d:\projects\study\open\main.cpp
+	<iostream>
+	<fstream>
+	<cstddef>
+	"DataList.h"
+	"OrderedData.h"
+	"OpenData.h"
+
+1691151945 source:d:\projects\study\open\src\readdata.cpp
+	"ReadData.h"
+
+1691409703 d:\projects\study\open\include\readdata.h
+	<vector>
+	<algorithm>
+	"DataList.h"
+	<iostream>
+
+1691387482 d:\projects\study\open\include\datalist.hpp
+
+1691406327 source:d:\projects\study\open\src\datalist.cpp
+	"DataList.h"
+
+1691412739 d:\projects\study\open\include\datalist.h
+	<stdio.h>
+
+1691415355 d:\projects\study\open\include\ordereddata.h
+	<vector>
+	<algorithm>
+	"DataList.h"
+	<iostream>
+
+1691409969 source:d:\projects\study\open\src\ordereddata.cpp
+	"OrderedData.h"
+
+1691416542 source:d:\projects\study\open\src\opendata.cpp
+	"OpenData.h"
+
+1691416792 d:\projects\study\open\include\opendata.h
+	<string>
+	<fstream>
+	<vector>
+	"DataList.h"
+
