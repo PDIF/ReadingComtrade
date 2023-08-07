@@ -23,49 +23,16 @@ type_matrix_t& OpenData::getData() {
 };
 
 
-type_matrix_t OpenData::openData(const std::string& openFile) {
+void OpenData::readRecord(std::ifstream& readFile,
+                          type_matrix_t& result  ,
+                          size_t    firstIndex   ,
+                          size_t    lastIndex    ,
+                          size_t    harmonic     ) {
 
-    std::ifstream readFile(openFile, std::ios::binary | std::ios::in);
+    for (size_t trying = 0; trying < harmonic; ++trying) {
 
-    //Размер базовой части осциллограммы
-    size_t startBase = static_cast<size_t>(WAVETYPE::BASE::FIRST);
-    size_t lastBase  = static_cast<size_t>(WAVETYPE::BASE::LAST);
+        for (size_t index = firstIndex; index < lastIndex; ++index) {
 
-    //Чтение высокочастотной частоты в пределах одной записи
-    size_t startHigh = static_cast<size_t>(WAVETYPE::HIGH::FIRST);
-    size_t lastHigh  = static_cast<size_t>(WAVETYPE::HIGH::LAST);
-
-
-    type_matrix_t result;
-
-    result.resize(getRecordsNumber());
-
-
-
-    for (size_t i = 0; i < )
-
-
-
-
-
-
-    for (size_t i = 0; i < getRecordsNumber(); ++i) {
-
-        //Установка начальной позиции для считывания новой записи
-        readFile.seekg(getSkipSize() + i * getRecordsSize());
-
-
-        size_t startBase = static_cast<size_t>(WAVETYPE::BASE::FIRST);
-        size_t lastBase  = static_cast<size_t>(WAVETYPE::BASE::LAST);
-
-        size_t startHigh = static_cast<size_t>(WAVETYPE::HIGH::FIRST);
-        size_t lastHigh  = static_cast<size_t>(WAVETYPE::HIGH::LAST);
-        //for (size_t j = startBase; j < lastBase; ++j) {
-
-        using namespace WAVETYPE;
-
-        //Чтение данных нормальной частоты в пределах одной записи
-        for (auto j = BASE::FIRST; j < BASE::LAST; ++j) {
             //1. Чтение первого байта
             short symbol = 0;
             readFile.read(reinterpret_cast<char*>(&symbol), 1);
@@ -73,40 +40,67 @@ type_matrix_t OpenData::openData(const std::string& openFile) {
             //2. Сохранение первого байта в отдельной переменной
             short processed = symbol << 8;
 
-            //3. Чтение второго байта и объединение обоих байт
+            //3. Чтение второго байта и объединение двух байт
             readFile.read((char*)&symbol, 1);
             processed = processed | symbol;
 
             //4. Запись полученного значения в итоговый массив
-            size_t channel = static_cast<size_t>(i);
             type_t value   = static_cast<type_t>(processed);
-            result[channel].push_back(value);
+            result[index].push_back(value);
+
         }
-
-        //Чтение данных высокой частоты в пределах одной записи
-        for (size_t k = 0; k < getHarmonicalNumber(); ++k) {
-
-            for (auto j = HIGH::FIRST; j < HIGH::LAST; ++j) {
-
-                //1. Чтение первого байта
-                short symbol = 0;
-                readFile.read(reinterpret_cast<char*>(&symbol), 1);
-
-                //2. Сохранение первого байта в отдельной переменной
-                short processed = symbol << 8;
-
-                //3. Чтение второго байта и объединение обоих байт
-                readFile.read((char*)&symbol, 1);
-                processed = processed | symbol;
+    }
+};
 
 
-                result[j].push_back(static_cast<type_t>(processed));
-            }
-        }
+
+
+
+
+type_matrix_t OpenData::openData(const std::string& openFile) {
+
+    using namespace WAVETYPE;
+
+    //Подготовка матрицы
+    type_matrix_t result(static_cast<size_t>(LAST));
+
+    for (auto i = BASE::FIRST; i < BASE::LAST; ++i) {
+        result[static_cast<size_t>(i)].reserve(getRecordsNumber());
+    }
+
+    for (auto i = HIGH::FIRST; i < HIGH::LAST; ++i) {
+        result[static_cast<size_t>(i)].reserve(getHarmonicalNumber());
+    }
+
+    for (auto i = CALC::FIRST; i < CALC::LAST; ++i) {
+        result[static_cast<size_t>(i)].reserve(getRecordsNumber());
+    }
+
+
+    //Открытие файла
+    std::ifstream readFile(openFile, std::ios::binary | std::ios::in);
+
+    //Заполнение матрицы
+    for (size_t i = 0; i < getRecordsNumber(); ++i) {
+
+        //Установка начальной позиции для считывания новой записи
+        readFile.seekg(getSkipSize() + i * getRecordsSize());
+
+        //Данные нормальной частоты текущей записи
+        readRecord(readFile, result,
+                   static_cast<size_t>(BASE::FIRST),
+                   static_cast<size_t>(BASE::LAST) ,
+                   1);
+
+        //Данные шестой гармоники текущей записи
+        readRecord(readFile, result,
+                   static_cast<size_t>(HIGH::FIRST),
+                   static_cast<size_t>(HIGH::LAST),
+                   6);
     }
 
     readFile.close();
 
     return result;
 
-}
+};

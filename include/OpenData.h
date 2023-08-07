@@ -29,6 +29,11 @@ private:
 
     type_matrix_t data;
 
+
+    ///Чтение, интерпретация и запись блока данных в матрицу значений
+    void readRecord(std::ifstream&, type_matrix_t&, size_t, size_t, size_t);
+
+
     ///Количество записей в одной осциллограмме
     size_t getRecordsNumber() {
         return 2000;
